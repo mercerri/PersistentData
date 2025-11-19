@@ -2,201 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FosterTrack – Cats</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <title>FosterTrack Prototype</title>
   <style>
-    /* ----- Base layout ----- */
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+    }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: #f7f7f7;
+      background: #f4f4f4;
       display: flex;
+      align-items: center;
       justify-content: center;
+      height: 100vh;
     }
 
     /* Phone frame */
     .phone {
-      width: 390px;           /* ~iPhone 14 width */
-      min-height: 844px;      /* ~iPhone 14 height */
-      max-height: 100vh;
-      background: #ffffff;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      border-radius: 34px;
+      width: 390px;   /* iPhone-ish width */
+      height: 844px;  /* iPhone-ish height */
+      border-radius: 40px;
+      border: 10px solid #000;
+      background: #fff;
       overflow: hidden;
       position: relative;
-      display: flex;
-      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
     }
 
-    .phone-inner {
-      padding: 24px 20px 16px;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      box-sizing: border-box;
-    }
-
-    /* ----- Shared header styles ----- */
-    header {
-      margin-bottom: 16px;
-    }
-
-    header h1 {
-      font-size: 22px;
-      margin: 0 0 4px;
-    }
-
-    header p {
-      margin: 0;
-      font-size: 13px;
-      color: #666;
-    }
-
-    /* ----- Screen containers ----- */
     .screen {
+      width: 100%;
+      height: 100%;
+      padding: 32px 24px 80px;
       display: none;
-      flex: 1;
-      flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
     .screen.active {
-      display: flex;
-    }
-
-    /* ----- List screen ----- */
-    .cat-list {
-      flex: 1;
-      overflow-y: auto;
-      padding-bottom: 80px; /* room for FAB */
-    }
-
-    .empty-state {
-      margin-top: 32px;
-      text-align: center;
-      color: #888;
-      font-size: 14px;
-    }
-
-    .empty-state strong {
       display: block;
-      margin-bottom: 4px;
-      color: #444;
     }
 
-    .cat-card {
-      display: flex;
-      align-items: center;
-      background: #e5e5e5;
-      border-radius: 14px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-
-    .cat-photo-placeholder {
-      width: 96px;
-      height: 96px;
-      background: #c4c4c4;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .cat-photo-placeholder::before,
-    .cat-photo-placeholder::after {
-      content: "";
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
-      border: 1px solid #777;
-    }
-
-    .cat-photo-placeholder::before {
-      transform: rotate(45deg);
-    }
-    .cat-photo-placeholder::after {
-      transform: rotate(-45deg);
-    }
-
-    .cat-info {
-      flex: 1;
-      padding: 0 18px;
-    }
-
-    .cat-name {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .cat-meta {
-      font-size: 12px;
-      color: #555;
-    }
-
-    /* ----- Floating + button ----- */
-    .fab-container {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 26px;
-      display: flex;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .fab {
-      pointer-events: auto;
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      border: none;
-      background: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      line-height: 1;
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s;
-    }
-
-    .fab:active {
-      transform: translateY(1px) scale(0.98);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
-      background: #d6d6d6;
-    }
-
-    /* ----- Add-cat form screen ----- */
-    .form-group-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .form-group {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      font-size: 13px;
+    h1, h2, h3 {
+      margin: 0 0 24px;
+      font-size: 22px;
     }
 
     label {
+      font-size: 14px;
+      display: block;
       margin-bottom: 4px;
     }
 
-    input[type="text"],
-    input[type="date"],
-    textarea {
-      border: none;
-      background: #e5e5e5;
-      border-radius: 6px;
+    input, textarea {
+      width: 100%;
       padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #e6e6e6;
       font-size: 14px;
-      font-family: inherit;
-      box-sizing: border-box;
     }
 
     textarea {
@@ -204,204 +70,522 @@
       min-height: 120px;
     }
 
-    .form-actions {
-      margin-top: auto;
+    .row {
       display: flex;
-      justify-content: space-between;
-      padding-top: 24px;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
-    .btn {
-      padding: 10px 24px;
-      border-radius: 8px;
+    .row > .field {
+      flex: 1;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 24px;
+    }
+
+    button {
+      cursor: pointer;
+      border-radius: 6px;
       border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+
+    .btn-primary {
+      background: #222;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #ddd;
+      color: #111;
+    }
+
+    /* Home screen list */
+
+    .cat-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cat-card {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: #e6e6e6;
+      border-radius: 8px;
+      cursor: pointer;
+      gap: 10px;
+    }
+
+    .cat-card .thumb {
+      width: 60px;
+      height: 60px;
+      background: #c4c4c4;
+      border-radius: 6px;
+      position: relative;
+    }
+
+    .cat-card .thumb::before,
+    .cat-card .thumb::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 1px;
+      background: #666;
+      transform-origin: center;
+    }
+    .cat-card .thumb::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    .cat-card .thumb::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    .cat-name {
+      font-size: 18px;
+    }
+
+    .delete-btn {
+      margin-left: auto;
+      border: none;
+      background: none;
+      color: #d11a2a;
       font-size: 14px;
       cursor: pointer;
     }
 
-    .btn-primary {
-      background: #e0e0e0;
+    /* FAB (plus button at bottom) */
+
+    .fab {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: #e6e6e6;
+      border: 1px solid #bbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
-    .btn-secondary {
-      background: transparent;
-      color: #444;
+    .fab::before,
+    .fab::after {
+      content: "";
+      position: absolute;
+      background: #555;
+    }
+
+    .fab::before {
+      width: 24px;
+      height: 2px;
+    }
+
+    .fab::after {
+      width: 2px;
+      height: 24px;
+    }
+
+    .back-link {
+      font-size: 15px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      color: #007aff;
+    }
+
+    /* Logs list */
+
+    .log-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .log-card {
+      background: #e6e6e6;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .log-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    /* Toggle pill buttons (mood, medication) */
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      flex: 1;
+      padding: 8px 6px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .pill.selected {
+      border-color: #111;
+      background: #d0d0d0;
     }
   </style>
 </head>
 <body>
-  <div class="phone">
-    <div class="phone-inner">
-      <!-- SCREEN 1: CAT LIST -->
-      <section id="screen-list" class="screen active">
-        <header>
-          <h1>Foster Cats</h1>
-          <p>View and manage your current foster cats.</p>
-        </header>
+<div class="phone">
 
-        <main class="cat-list" id="cat-list"></main>
-      </section>
+  <!-- SCREEN 1: HOME (cat list) -->
+  <section class="screen active" id="screen-home">
+    <h2>FosterTrack</h2>
+    <p style="margin-bottom: 4px;">Your foster cats:</p>
+    <div class="cat-list" id="cat-list"></div>
+    <div class="fab" id="btn-add-cat" title="Add Foster Cat"></div>
+  </section>
 
-      <!-- SCREEN 2: ADD NEW FOSTER CAT -->
-      <section id="screen-add" class="screen">
-        <header>
-          <h1>Add a New Foster Cat</h1>
-        </header>
+  <!-- SCREEN 2: ADD NEW CAT -->
+  <section class="screen" id="screen-add-cat">
+    <div class="back-link" data-back="home">‹ Back</div>
+    <h2>Add a New Foster Cat</h2>
 
-        <form id="add-cat-form" autocomplete="off" style="flex:1; display:flex; flex-direction:column;">
-          <div class="form-group-row">
-            <div class="form-group">
-              <label for="cat-name">Name</label>
-              <input id="cat-name" type="text" required />
-            </div>
-            <div class="form-group">
-              <label for="cat-status">Status</label>
-              <input id="cat-status" type="text" placeholder="e.g. In care" />
-            </div>
-          </div>
-
-          <div class="form-group-row">
-            <div class="form-group">
-              <label for="cat-intake">Intake Date</label>
-              <input id="cat-intake" type="date" />
-            </div>
-            <div class="form-group">
-              <label for="cat-meds">Medications</label>
-              <input id="cat-meds" type="text" placeholder="Optional" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="cat-notes">Notes</label>
-            <textarea id="cat-notes" placeholder="Temperament, history, special care…"></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" id="save-cat-btn">
-              Save
-            </button>
-            <button type="button" class="btn btn-secondary" id="cancel-cat-btn">
-              Cancel
-            </button>
-          </div>
-        </form>
-      </section>
+    <div class="row">
+      <div class="field">
+        <label for="cat-name">Name</label>
+        <input id="cat-name" type="text" />
+      </div>
+      <div class="field">
+        <label for="cat-status">Status</label>
+        <input id="cat-status" type="text" placeholder="e.g. In care" />
+      </div>
     </div>
 
-    <!-- FAB only visible on list screen -->
-    <div class="fab-container" id="fab-container">
-      <button class="fab" id="add-cat-fab">+</button>
+    <div class="row">
+      <div class="field">
+        <label for="cat-intake">Intake Date</label>
+        <input id="cat-intake" type="date" />
+      </div>
+      <div class="field">
+        <label for="cat-meds">Medications</label>
+        <input id="cat-meds" type="text" placeholder="Optional" />
+      </div>
     </div>
-  </div>
 
-  <script>
-    // Simple state: list of cats (saved in localStorage so it persists)
-    let cats = [];
+    <div class="field">
+      <label for="cat-notes">Notes</label>
+      <textarea id="cat-notes" placeholder="Temperament, medical notes, etc."></textarea>
+    </div>
 
-    const SCREEN_LIST = document.getElementById("screen-list");
-    const SCREEN_ADD  = document.getElementById("screen-add");
-    const catListEl   = document.getElementById("cat-list");
-    const fab         = document.getElementById("add-cat-fab");
-    const fabContainer = document.getElementById("fab-container");
+    <div class="button-row">
+      <button class="btn-primary" id="btn-save-cat">Save</button>
+      <button class="btn-secondary" data-back="home">Cancel</button>
+    </div>
+  </section>
 
-    const form        = document.getElementById("add-cat-form");
-    const nameInput   = document.getElementById("cat-name");
-    const statusInput = document.getElementById("cat-status");
-    const intakeInput = document.getElementById("cat-intake");
-    const medsInput   = document.getElementById("cat-meds");
-    const notesInput  = document.getElementById("cat-notes");
-    const saveBtn     = document.getElementById("save-cat-btn");
-    const cancelBtn   = document.getElementById("cancel-cat-btn");
+  <!-- SCREEN 3: CAT LOGS -->
+  <section class="screen" id="screen-cat-logs">
+    <div class="back-link" data-back="home">‹ Back to Cats</div>
+    <h2 id="logs-cat-name">Cat</h2>
 
-    /* ---------- Screen switching ---------- */
-    function showListScreen() {
-      SCREEN_LIST.classList.add("active");
-      SCREEN_ADD.classList.remove("active");
-      fabContainer.style.display = "flex";
+    <div class="log-list" id="log-list"></div>
+
+    <div class="fab" id="btn-add-log" title="Add Log"></div>
+  </section>
+
+  <!-- SCREEN 4: ADD NEW LOG -->
+  <section class="screen" id="screen-add-log">
+    <div class="back-link" data-back="logs">‹ Back to Logs</div>
+    <h2>New Log</h2>
+
+    <div class="field">
+      <label for="log-date">Date</label>
+      <input id="log-date" type="date" />
+    </div>
+
+    <div class="field">
+      <label>Mood</label>
+      <div class="pill-row">
+        <div class="pill" data-mood="Happy">Happy</div>
+        <div class="pill" data-mood="Neutral">Neutral</div>
+        <div class="pill" data-mood="Sad">Sad</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Medication</label>
+      <div class="pill-row">
+        <div class="pill" data-med="Yes">Yes</div>
+        <div class="pill" data-med="No">No</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="log-meds">Medication Details</label>
+      <input id="log-meds" type="text" placeholder="Name / dosage (optional)" />
+    </div>
+
+    <div class="field">
+      <label for="log-notes">Notes</label>
+      <textarea id="log-notes" placeholder="Behaviour, appetite, litter box, etc."></textarea>
+    </div>
+
+    <div class="button-row">
+      <button class="btn-primary" id="btn-save-log">Save</button>
+      <button class="btn-secondary" data-back="logs">Cancel</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  // ---------- Simple in-memory state ----------
+  const state = {
+    cats: [],          // no default cats
+    currentCatId: null,
+    currentMood: null,
+    currentMed: null
+  };
+
+  // Utility: show a screen by id
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  // ---------- Rendering: Cats ----------
+
+  function renderCats() {
+    const container = document.getElementById("cat-list");
+    container.innerHTML = "";
+
+    if (state.cats.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "No foster cats yet. Tap + to add one.";
+      empty.style.color = "#666";
+      empty.style.marginTop = "8px";
+      container.appendChild(empty);
+      return;
     }
 
-    function showAddScreen() {
-      SCREEN_LIST.classList.remove("active");
-      SCREEN_ADD.classList.add("active");
-      fabContainer.style.display = "none";
-      nameInput.focus();
-    }
+    state.cats.forEach(cat => {
+      const card = document.createElement("div");
+      card.className = "cat-card";
+      card.innerHTML = `
+        <div class="thumb"></div>
+        <div class="cat-name">${cat.name}</div>
+        <button class="delete-btn">Delete</button>
+      `;
 
-    fab.addEventListener("click", showAddScreen);
-    cancelBtn.addEventListener("click", () => {
-      form.reset();
-      showListScreen();
-    });
-
-    /* ---------- Rendering cats ---------- */
-    function renderCats() {
-      catListEl.innerHTML = "";
-      if (cats.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "empty-state";
-        empty.innerHTML = `
-          <strong>No cats added yet</strong>
-          Tap the + button below to add your first foster cat.
-        `;
-        catListEl.appendChild(empty);
-        return;
-      }
-
-      cats.forEach(cat => {
-        const card = document.createElement("article");
-        card.className = "cat-card";
-        card.innerHTML = `
-          <div class="cat-photo-placeholder"></div>
-          <div class="cat-info">
-            <div class="cat-name">${cat.name}</div>
-            <div class="cat-meta">
-              ${cat.status ? cat.status + " · " : ""}
-              ${cat.intakeDate ? cat.intakeDate : ""}
-            </div>
-          </div>
-        `;
-        catListEl.appendChild(card);
+      // Open logs when clicking the card
+      card.addEventListener("click", () => {
+        state.currentCatId = cat.id;
+        renderLogs();
+        showScreen("screen-cat-logs");
       });
-    }
 
-    /* ---------- Save new cat ---------- */
-    saveBtn.addEventListener("click", () => {
-      if (!nameInput.value.trim()) {
-        alert("Please enter a name for the cat.");
-        nameInput.focus();
-        return;
-      }
-
-      const newCat = {
-        name: nameInput.value.trim(),
-        status: statusInput.value.trim(),
-        intakeDate: intakeInput.value,
-        medications: medsInput.value.trim(),
-        notes: notesInput.value.trim(),
-      };
-
-      cats.push(newCat);
-      localStorage.setItem("fostertrack_cats", JSON.stringify(cats));
-
-      form.reset();
-      showListScreen();
-      renderCats();
-    });
-
-    /* ---------- Load from localStorage on startup ---------- */
-    function loadCats() {
-      const stored = localStorage.getItem("fostertrack_cats");
-      if (stored) {
-        try {
-          cats = JSON.parse(stored);
-        } catch (e) {
-          cats = [];
+      // Delete cat (stop card click)
+      const deleteBtn = card.querySelector(".delete-btn");
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        state.cats = state.cats.filter(c => c.id !== cat.id);
+        if (state.currentCatId === cat.id) {
+          state.currentCatId = null;
         }
-      }
+        renderCats();
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  // ---------- Rendering: Logs ----------
+
+  function getCurrentCat() {
+    return state.cats.find(c => c.id === state.currentCatId) || null;
+  }
+
+  function renderLogs() {
+    const cat = getCurrentCat();
+    const title = document.getElementById("logs-cat-name");
+    const list = document.getElementById("log-list");
+    list.innerHTML = "";
+
+    if (!cat) {
+      title.textContent = "Cat";
+      return;
     }
 
-    loadCats();
+    title.textContent = cat.name;
+
+    if (!cat.logs || cat.logs.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "No logs yet. Tap + to add one.";
+      empty.style.color = "#666";
+      list.appendChild(empty);
+      return;
+    }
+
+    cat.logs.forEach((log, index) => {
+      const card = document.createElement("div");
+      card.className = "log-card";
+      card.innerHTML = `
+        <div class="log-title">Log ${index + 1}</div>
+        <div>${log.date || "No date"}</div>
+        <div>Mood: ${log.mood || "-"}</div>
+        <div>Medication: ${log.medication || "-"}</div>
+        ${log.notes ? `<div>Notes: ${log.notes}</div>` : ""}
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // ---------- Event wiring ----------
+
+  // FAB to add cat
+  document.getElementById("btn-add-cat").addEventListener("click", () => {
+    // clear form
+    document.getElementById("cat-name").value = "";
+    document.getElementById("cat-status").value = "";
+    document.getElementById("cat-intake").value = "";
+    document.getElementById("cat-meds").value = "";
+    document.getElementById("cat-notes").value = "";
+
+    showScreen("screen-add-cat");
+  });
+
+  // Save cat
+  document.getElementById("btn-save-cat").addEventListener("click", () => {
+    const name = document.getElementById("cat-name").value.trim();
+    const status = document.getElementById("cat-status").value.trim();
+    const intake = document.getElementById("cat-intake").value;
+    const meds = document.getElementById("cat-meds").value.trim();
+    const notes = document.getElementById("cat-notes").value.trim();
+
+    if (!name) {
+      alert("Please enter a name for the foster cat.");
+      return;
+    }
+
+    const newCat = {
+      id: Date.now().toString(),
+      name,
+      status,
+      intakeDate: intake,
+      medications: meds,
+      notes,
+      logs: []
+    };
+
+    state.cats.push(newCat);
     renderCats();
-  </script>
+    showScreen("screen-home");
+  });
+
+  // FAB to add log
+  document.getElementById("btn-add-log").addEventListener("click", () => {
+    const cat = getCurrentCat();
+    if (!cat) return;
+
+    // reset mood/med selections
+    state.currentMood = null;
+    state.currentMed = null;
+
+    document.getElementById("log-date").value = "";
+    document.getElementById("log-meds").value = "";
+    document.getElementById("log-notes").value = "";
+
+    document
+      .querySelectorAll('.pill[data-mood]')
+      .forEach(p => p.classList.remove("selected"));
+    document
+      .querySelectorAll('.pill[data-med]')
+      .forEach(p => p.classList.remove("selected"));
+
+    showScreen("screen-add-log");
+  });
+
+  // Mood pills
+  document.querySelectorAll('.pill[data-mood]').forEach(pill => {
+    pill.addEventListener("click", () => {
+      document
+        .querySelectorAll('.pill[data-mood]')
+        .forEach(p => p.classList.remove("selected"));
+      pill.classList.add("selected");
+      state.currentMood = pill.dataset.mood;
+    });
+  });
+
+  // Medication pills
+  document.querySelectorAll('.pill[data-med]').forEach(pill => {
+    pill.addEventListener("click", () => {
+      document
+        .querySelectorAll('.pill[data-med]')
+        .forEach(p => p.classList.remove("selected"));
+      pill.classList.add("selected");
+      state.currentMed = pill.dataset.med;
+    });
+  });
+
+  // Save log
+  document.getElementById("btn-save-log").addEventListener("click", () => {
+    const cat = getCurrentCat();
+    if (!cat) {
+      alert("No cat selected.");
+      return;
+    }
+
+    const date = document.getElementById("log-date").value;
+    const medDetails = document.getElementById("log-meds").value.trim();
+    const notes = document.getElementById("log-notes").value.trim();
+
+    const newLog = {
+      id: Date.now().toString(),
+      date,
+      mood: state.currentMood,
+      medication: state.currentMed,
+      medDetails,
+      notes
+    };
+
+    cat.logs.push(newLog);
+    renderLogs();
+    showScreen("screen-cat-logs");
+  });
+
+  // Back links
+  document.querySelectorAll("[data-back]").forEach(el => {
+    el.addEventListener("click", () => {
+      const target = el.dataset.back;
+      if (target === "home") {
+        showScreen("screen-home");
+      } else if (target === "logs") {
+        showScreen("screen-cat-logs");
+      }
+    });
+  });
+
+  // Initial render
+  renderCats();
+</script>
 </body>
 </html>
