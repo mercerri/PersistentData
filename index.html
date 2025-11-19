@@ -3,15 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <title>FosterTrack Prototype</title>
+
+  <!-- Google Font for nicer typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --bg-body: #eef3f7;
+      --phone-bg: #fdfdfd;
+      --accent: #3a7f7b;
+      --accent-soft: #e1f2f0;
+      --accent-strong: #25524f;
+      --text-main: #1f2933;
+      --text-muted: #6b7280;
+      --card-bg: #f3f4f6;
+      --border-subtle: #e0e4ea;
+      --danger: #d11a2a;
+      --pill-bg: #e6f0ef;
+      --pill-border: #b7cfcb;
+    }
+
     * {
       box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
 
     body {
       margin: 0;
-      background: #f4f4f4;
+      background: radial-gradient(circle at top, #f6fbff 0, #eef3f7 40%, #e1e5ee 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -22,85 +43,151 @@
       width: 390px;
       height: 844px;
       border-radius: 40px;
-      border: 10px solid #000;
-      background: #fff;
+      border: 10px solid #111827;
+      background: var(--phone-bg);
       overflow: hidden;
       position: relative;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.28),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
     }
 
     .screen {
       width: 100%;
       height: 100%;
-      padding: 32px 24px 80px;
+      padding: 28px 22px 80px;
       display: none;
       position: absolute;
       top: 0;
       left: 0;
+      background: radial-gradient(circle at top, #f9fbff 0, #f6f7fb 55%, #f1f2f6 100%);
     }
     .screen.active { display: block; }
 
     h1, h2, h3 {
-      margin: 0 0 24px;
+      margin: 0 0 4px;
       font-size: 22px;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
     }
 
-    label { font-size: 14px; display: block; margin-bottom: 4px; }
+    /* Top intro text under headings */
+    .screen > p {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    label {
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
 
     input, textarea, select {
       width: 100%;
       padding: 8px 10px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background: #e6e6e6;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: #f4f5f7;
       font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(58, 127, 123, 0.2);
     }
 
     textarea { resize: none; min-height: 90px;}
 
-    .row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
     .row > .field { flex: 1; }
-    .field { margin-bottom: 16px; }
+    .field { margin-bottom: 14px; }
 
     .button-row {
       display: flex;
       justify-content: space-between;
-      margin-top: 24px;
+      margin-top: 20px;
+      gap: 10px;
     }
 
     button {
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 999px;
       border: none;
       padding: 10px 20px;
       font-size: 15px;
+      font-weight: 600;
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.15s ease;
     }
 
-    .btn-primary { background: #222; color: #fff; }
-    .btn-secondary { background: #ddd; color: #111; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(58, 127, 123, 0.35);
+    }
 
+    .btn-primary:hover {
+      background: var(--accent-strong);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(37, 82, 79, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+      transform: translateY(-1px);
+    }
+
+    /* CAT LIST */
     .cat-list {
       margin-top: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .cat-card {
       display: flex;
       align-items: center;
       padding: 10px 12px;
-      background: #e6e6e6;
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 14px;
       cursor: pointer;
       gap: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+      transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .cat-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+      border-color: rgba(58, 127, 123, 0.4);
     }
 
     .thumb {
-      width: 60px;
-      height: 60px;
-      background: #c4c4c4;
-      border-radius: 6px;
+      width: 56px;
+      height: 56px;
+      background: #d1d5db;
+      border-radius: 14px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -124,20 +211,36 @@
       top: 50%; left: 50%;
       transform-origin: center;
     }
-
     .thumb.placeholder::before { transform: translate(-50%, -50%) rotate(45deg); }
     .thumb.placeholder::after  { transform: translate(-50%, -50%) rotate(-45deg); }
 
-    .cat-name { font-size: 18px; font-weight: 600; }
-    .cat-subinfo { font-size: 13px; color: #444; margin-top: 2px; }
+    .cat-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .cat-subinfo {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
 
     .delete-btn {
       margin-left: auto;
       border: none;
       background: none;
-      color: #d11a2a;
-      font-size: 14px;
+      color: var(--danger);
+      font-size: 13px;
       cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 999px;
+      transition: background 0.12s ease, transform 0.08s ease;
+    }
+
+    .delete-btn:hover {
+      background: rgba(209, 26, 42, 0.06);
+      transform: translateY(-1px);
     }
 
     .fab {
@@ -145,46 +248,66 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      background: #e6e6e6;
-      border: 1px solid #bbb;
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: var(--accent);
+      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      box-shadow: 0 10px 25px rgba(37, 82, 79, 0.5);
     }
 
     .fab::before,
     .fab::after {
       content: "";
       position: absolute;
-      background: #555;
+      background: #fff;
+      border-radius: 999px;
     }
-    .fab::before { width: 24px; height: 2px; }
-    .fab::after { width: 2px; height: 24px; }
+    .fab::before { width: 26px; height: 2px; }
+    .fab::after { width: 2px; height: 26px; }
+
+    .fab:hover {
+      transform: translateX(-50%) translateY(-1px);
+      box-shadow: 0 14px 32px rgba(37, 82, 79, 0.6);
+    }
 
     .back-link {
-      font-size: 15px;
+      font-size: 14px;
       margin-bottom: 16px;
       cursor: pointer;
-      color: #007aff;
+      color: var(--accent-strong);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    /* ------------------ PHOTO UPLOAD ------------------ */
+    .back-link::before {
+      content: "←";
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* PHOTO UPLOAD */
 
     .photo-preview {
       width: 150px;
       height: 150px;
-      background: #d9d9d9;
-      border-radius: 10px;
-      margin: 0 auto 10px;
+      background: #e5e7eb;
+      border-radius: 20px;
+      margin: 0 auto 8px;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
     }
 
     .photo-preview img {
@@ -199,7 +322,7 @@
       position: absolute;
       width: 60%;
       height: 2px;
-      background: #666;
+      background: #9ca3af;
       top: 50%;
       left: 50%;
     }
@@ -220,50 +343,70 @@
 
     .choose-photo-btn {
       text-align: center;
-      font-size: 14px;
-      color: #007aff;
+      font-size: 13px;
+      color: var(--accent-strong);
       cursor: pointer;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
 
+    .choose-photo-btn:hover {
+      color: var(--accent);
+    }
+
+    /* LOG LIST */
+
     .log-list {
-      margin-top: 12px;
+      margin-top: 8px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
     .log-card {
-      background: #e6e6e6;
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 14px;
       padding: 10px 12px;
-      font-size: 14px;
+      font-size: 13px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
     }
 
-    .log-title { font-weight: 600; margin-bottom: 4px; }
+    .log-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--accent-strong);
+      font-size: 13px;
+    }
+
+    /* PILLS (personality + mood + medication) */
 
     .pill-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .pill {
-      padding: 8px 12px;
-      background: #e0e0e0;
-      border-radius: 20px;
-      font-size: 14px;
+      padding: 7px 12px;
+      background: var(--pill-bg);
+      border-radius: 999px;
+      font-size: 13px;
       cursor: pointer;
       border: 1px solid transparent;
+      color: var(--text-main);
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
     }
+
     .pill.selected {
-      border-color: #111;
-      background: #d0d0d0;
+      border-color: var(--pill-border);
+      background: #d6ebe8;
+      transform: translateY(-1px);
     }
   </style>
 </head>
-
 <body>
 <div class="phone">
 
@@ -277,11 +420,12 @@
 
   <!-- ADD NEW CAT -->
   <section class="screen" id="screen-add-cat">
-    <div class="back-link" data-back="home">‹ Back</div>
+    <div class="back-link" data-back="home">Back</div>
     <h2>Add a New Foster Cat</h2>
 
+    <!-- PHOTO PREVIEW BOX -->
     <div class="photo-preview placeholder" id="cat-photo-preview"></div>
-    <div class="choose-photo-btn" id="choose-photo-btn">Choose Photo</div>
+    <div class="choose-photo-btn" id="choose-photo-btn">Choose photo from device</div>
     <input type="file" id="cat-photo-input" accept="image/*" style="display:none;" />
 
     <div class="row">
@@ -307,7 +451,6 @@
         <label>Intake Date</label>
         <input id="cat-intake" type="date" />
       </div>
-
       <div class="field">
         <label>Medications</label>
         <input id="cat-meds" type="text" placeholder="Optional" />
@@ -333,7 +476,7 @@
 
   <!-- CAT LOGS -->
   <section class="screen" id="screen-cat-logs">
-    <div class="back-link" data-back="home">‹ Back to Cats</div>
+    <div class="back-link" data-back="home">Back to Cats</div>
     <h2 id="logs-cat-name">Cat</h2>
     <div class="log-list" id="log-list"></div>
     <div class="fab" id="btn-add-log"></div>
@@ -341,7 +484,7 @@
 
   <!-- ADD NEW LOG -->
   <section class="screen" id="screen-add-log">
-    <div class="back-link" data-back="logs">‹ Back to Logs</div>
+    <div class="back-link" data-back="logs">Back to Logs</div>
     <h2>New Log</h2>
 
     <div class="field">
@@ -400,7 +543,7 @@
     return state.cats.find(c => c.id === state.currentCatId) || null;
   }
 
-  /* ------------------------- PERSONALITY ------------------------- */
+  /* PERSONALITY */
   const personalityOptions = [
     "Shy","Playful","Relaxed","Independent",
     "Energetic","Affectionate","Curious","Quiet","Vocal","Calm"
@@ -417,7 +560,7 @@
     personalityPillsContainer.appendChild(pill);
   });
 
-  /* ------------------------- PHOTO UPLOAD ------------------------- */
+  /* PHOTO UPLOAD */
   const previewBox = document.getElementById("cat-photo-preview");
   const chooseBtn = document.getElementById("choose-photo-btn");
   const photoInput = document.getElementById("cat-photo-input");
@@ -437,7 +580,7 @@
     reader.readAsDataURL(file);
   });
 
-  /* ------------------------- RENDER CATS ------------------------- */
+  /* RENDER CATS */
   function renderCats() {
     const container = document.getElementById("cat-list");
     container.innerHTML = "";
@@ -445,7 +588,8 @@
     if (state.cats.length === 0) {
       const empty = document.createElement("p");
       empty.textContent = "No foster cats yet. Tap + to add one.";
-      empty.style.color = "#666";
+      empty.style.color = "#6b7280";
+      empty.style.fontSize = "13px";
       return container.appendChild(empty);
     }
 
@@ -483,7 +627,7 @@
     });
   }
 
-  /* ------------------------- ADD CAT ------------------------- */
+  /* ADD CAT */
   document.getElementById("btn-add-cat").addEventListener("click", () => {
     document.getElementById("cat-name").value = "";
     document.getElementById("cat-status").value = "In Foster";
@@ -523,7 +667,7 @@
     showScreen("screen-home");
   });
 
-  /* ------------------------- LOGS ------------------------- */
+  /* LOGS */
   function renderLogs() {
     const cat = getCurrentCat();
     const list = document.getElementById("log-list");
@@ -534,7 +678,8 @@
     if (cat.logs.length === 0) {
       const empty = document.createElement("p");
       empty.textContent = "No logs yet. Tap + to add one.";
-      empty.style.color = "#666";
+      empty.style.color = "#6b7280";
+      empty.style.fontSize = "13px";
       return list.appendChild(empty);
     }
 
