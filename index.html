@@ -25,11 +25,11 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       border-radius: 34px;
       overflow: hidden;
+      position: relative;
       display: flex;
       flex-direction: column;
     }
 
-    /* Status bar / top padding feel */
     .phone-inner {
       padding: 24px 20px 16px;
       display: flex;
@@ -38,7 +38,7 @@
       box-sizing: border-box;
     }
 
-    /* ----- Header ----- */
+    /* ----- Shared header styles ----- */
     header {
       margin-bottom: 16px;
     }
@@ -54,7 +54,18 @@
       color: #666;
     }
 
-    /* ----- List area ----- */
+    /* ----- Screen containers ----- */
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ----- List screen ----- */
     .cat-list {
       flex: 1;
       overflow-y: auto;
@@ -74,7 +85,6 @@
       color: #444;
     }
 
-    /* Example card style (we’ll use later when cats exist) */
     .cat-card {
       display: flex;
       align-items: center;
@@ -110,10 +120,19 @@
       transform: rotate(-45deg);
     }
 
-    .cat-name {
+    .cat-info {
       flex: 1;
       padding: 0 18px;
-      font-size: 22px;
+    }
+
+    .cat-name {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .cat-meta {
+      font-size: 12px;
+      color: #555;
     }
 
     /* ----- Floating + button ----- */
@@ -124,7 +143,7 @@
       bottom: 26px;
       display: flex;
       justify-content: center;
-      pointer-events: none; /* so only button is clickable */
+      pointer-events: none;
     }
 
     .fab {
@@ -149,46 +168,240 @@
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
       background: #d6d6d6;
     }
+
+    /* ----- Add-cat form screen ----- */
+    .form-group-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    label {
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      border: none;
+      background: #e5e5e5;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 120px;
+    }
+
+    .form-actions {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      padding-top: 24px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #e0e0e0;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #444;
+    }
   </style>
 </head>
 <body>
   <div class="phone">
     <div class="phone-inner">
-      <header>
-        <h1>Foster Cats</h1>
-        <p>View and manage your current foster cats.</p>
-      </header>
+      <!-- SCREEN 1: CAT LIST -->
+      <section id="screen-list" class="screen active">
+        <header>
+          <h1>Foster Cats</h1>
+          <p>View and manage your current foster cats.</p>
+        </header>
 
-      <main class="cat-list">
-        <!-- For now it’s empty; no Piri/Misty yet -->
-        <div class="empty-state">
-          <strong>No cats added yet</strong>
-          Tap the + button below to add your first foster cat.
-        </div>
+        <main class="cat-list" id="cat-list"></main>
+      </section>
 
-        <!-- Example of what a card will look like later:
-        <article class="cat-card">
-          <div class="cat-photo-placeholder"></div>
-          <div class="cat-name">Piri</div>
-        </article>
-        -->
-      </main>
+      <!-- SCREEN 2: ADD NEW FOSTER CAT -->
+      <section id="screen-add" class="screen">
+        <header>
+          <h1>Add a New Foster Cat</h1>
+        </header>
+
+        <form id="add-cat-form" autocomplete="off" style="flex:1; display:flex; flex-direction:column;">
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="cat-name">Name</label>
+              <input id="cat-name" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="cat-status">Status</label>
+              <input id="cat-status" type="text" placeholder="e.g. In care" />
+            </div>
+          </div>
+
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="cat-intake">Intake Date</label>
+              <input id="cat-intake" type="date" />
+            </div>
+            <div class="form-group">
+              <label for="cat-meds">Medications</label>
+              <input id="cat-meds" type="text" placeholder="Optional" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cat-notes">Notes</label>
+            <textarea id="cat-notes" placeholder="Temperament, history, special care…"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="save-cat-btn">
+              Save
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancel-cat-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
 
-    <!-- Floating + button (will route to “Add New Foster Cat” screen later) -->
-    <div class="fab-container">
-      <button class="fab" onclick="onAddCat()">
-        +
-      </button>
+    <!-- FAB only visible on list screen -->
+    <div class="fab-container" id="fab-container">
+      <button class="fab" id="add-cat-fab">+</button>
     </div>
   </div>
 
   <script>
-    // For now, just a placeholder so you can see something happen:
-    function onAddCat() {
-      alert("This will open the 'Add New Foster Cat' screen.");
-      // Later we’ll navigate to your second screen or another HTML file.
+    // Simple state: list of cats (saved in localStorage so it persists)
+    let cats = [];
+
+    const SCREEN_LIST = document.getElementById("screen-list");
+    const SCREEN_ADD  = document.getElementById("screen-add");
+    const catListEl   = document.getElementById("cat-list");
+    const fab         = document.getElementById("add-cat-fab");
+    const fabContainer = document.getElementById("fab-container");
+
+    const form        = document.getElementById("add-cat-form");
+    const nameInput   = document.getElementById("cat-name");
+    const statusInput = document.getElementById("cat-status");
+    const intakeInput = document.getElementById("cat-intake");
+    const medsInput   = document.getElementById("cat-meds");
+    const notesInput  = document.getElementById("cat-notes");
+    const saveBtn     = document.getElementById("save-cat-btn");
+    const cancelBtn   = document.getElementById("cancel-cat-btn");
+
+    /* ---------- Screen switching ---------- */
+    function showListScreen() {
+      SCREEN_LIST.classList.add("active");
+      SCREEN_ADD.classList.remove("active");
+      fabContainer.style.display = "flex";
     }
+
+    function showAddScreen() {
+      SCREEN_LIST.classList.remove("active");
+      SCREEN_ADD.classList.add("active");
+      fabContainer.style.display = "none";
+      nameInput.focus();
+    }
+
+    fab.addEventListener("click", showAddScreen);
+    cancelBtn.addEventListener("click", () => {
+      form.reset();
+      showListScreen();
+    });
+
+    /* ---------- Rendering cats ---------- */
+    function renderCats() {
+      catListEl.innerHTML = "";
+      if (cats.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = `
+          <strong>No cats added yet</strong>
+          Tap the + button below to add your first foster cat.
+        `;
+        catListEl.appendChild(empty);
+        return;
+      }
+
+      cats.forEach(cat => {
+        const card = document.createElement("article");
+        card.className = "cat-card";
+        card.innerHTML = `
+          <div class="cat-photo-placeholder"></div>
+          <div class="cat-info">
+            <div class="cat-name">${cat.name}</div>
+            <div class="cat-meta">
+              ${cat.status ? cat.status + " · " : ""}
+              ${cat.intakeDate ? cat.intakeDate : ""}
+            </div>
+          </div>
+        `;
+        catListEl.appendChild(card);
+      });
+    }
+
+    /* ---------- Save new cat ---------- */
+    saveBtn.addEventListener("click", () => {
+      if (!nameInput.value.trim()) {
+        alert("Please enter a name for the cat.");
+        nameInput.focus();
+        return;
+      }
+
+      const newCat = {
+        name: nameInput.value.trim(),
+        status: statusInput.value.trim(),
+        intakeDate: intakeInput.value,
+        medications: medsInput.value.trim(),
+        notes: notesInput.value.trim(),
+      };
+
+      cats.push(newCat);
+      localStorage.setItem("fostertrack_cats", JSON.stringify(cats));
+
+      form.reset();
+      showListScreen();
+      renderCats();
+    });
+
+    /* ---------- Load from localStorage on startup ---------- */
+    function loadCats() {
+      const stored = localStorage.getItem("fostertrack_cats");
+      if (stored) {
+        try {
+          cats = JSON.parse(stored);
+        } catch (e) {
+          cats = [];
+        }
+      }
+    }
+
+    loadCats();
+    renderCats();
   </script>
 </body>
 </html>
