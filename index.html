@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FosterTrack – Cats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    /* ----- Base layout ----- */
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Phone frame */
+    .phone {
+      width: 390px;           /* ~iPhone 14 width */
+      min-height: 844px;      /* ~iPhone 14 height */
+      max-height: 100vh;
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      border-radius: 34px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Status bar / top padding feel */
+    .phone-inner {
+      padding: 24px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ----- Header ----- */
+    header {
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 22px;
+      margin: 0 0 4px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* ----- List area ----- */
+    .cat-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 80px; /* room for FAB */
+    }
+
+    .empty-state {
+      margin-top: 32px;
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+    }
+
+    .empty-state strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #444;
+    }
+
+    /* Example card style (we’ll use later when cats exist) */
+    .cat-card {
+      display: flex;
+      align-items: center;
+      background: #e5e5e5;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .cat-photo-placeholder {
+      width: 96px;
+      height: 96px;
+      background: #c4c4c4;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .cat-photo-placeholder::before,
+    .cat-photo-placeholder::after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      border: 1px solid #777;
+    }
+
+    .cat-photo-placeholder::before {
+      transform: rotate(45deg);
+    }
+    .cat-photo-placeholder::after {
+      transform: rotate(-45deg);
+    }
+
+    .cat-name {
+      flex: 1;
+      padding: 0 18px;
+      font-size: 22px;
+    }
+
+    /* ----- Floating + button ----- */
+    .fab-container {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 26px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none; /* so only button is clickable */
+    }
+
+    .fab {
+      pointer-events: auto;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      border: none;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s;
+    }
+
+    .fab:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+      background: #d6d6d6;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-inner">
+      <header>
+        <h1>Foster Cats</h1>
+        <p>View and manage your current foster cats.</p>
+      </header>
+
+      <main class="cat-list">
+        <!-- For now it’s empty; no Piri/Misty yet -->
+        <div class="empty-state">
+          <strong>No cats added yet</strong>
+          Tap the + button below to add your first foster cat.
+        </div>
+
+        <!-- Example of what a card will look like later:
+        <article class="cat-card">
+          <div class="cat-photo-placeholder"></div>
+          <div class="cat-name">Piri</div>
+        </article>
+        -->
+      </main>
+    </div>
+
+    <!-- Floating + button (will route to “Add New Foster Cat” screen later) -->
+    <div class="fab-container">
+      <button class="fab" onclick="onAddCat()">
+        +
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // For now, just a placeholder so you can see something happen:
+    function onAddCat() {
+      alert("This will open the 'Add New Foster Cat' screen.");
+      // Later we’ll navigate to your second screen or another HTML file.
+    }
+  </script>
+</body>
+</html>
