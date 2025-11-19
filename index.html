@@ -452,8 +452,14 @@
         <input id="cat-intake" type="date" />
       </div>
       <div class="field">
-        <label>Medications</label>
-        <input id="cat-meds" type="text" placeholder="Optional" />
+        <label>Gender</label>
+        <select id="cat-gender">
+          <option value="Unknown">Unknown</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Female (Spayed)">Female (Spayed)</option>
+          <option value="Male (Neutered)">Male (Neutered)</option>
+        </select>
       </div>
     </div>
 
@@ -604,7 +610,7 @@
         <div>
           <div class="cat-name">${cat.name}</div>
           <div class="cat-subinfo">
-            ${cat.status} • ${cat.intakeDate || "No date"}
+            ${cat.status}${cat.gender ? ` • ${cat.gender}` : ""} • ${cat.intakeDate || "No date"}
             ${cat.personality.length ? ` • ${cat.personality.join(", ")}` : ""}
           </div>
         </div>
@@ -632,7 +638,7 @@
     document.getElementById("cat-name").value = "";
     document.getElementById("cat-status").value = "In Foster";
     document.getElementById("cat-intake").value = "";
-    document.getElementById("cat-meds").value = "";
+    document.getElementById("cat-gender").value = "Unknown";
     document.getElementById("cat-notes").value = "";
     document.querySelectorAll("[data-personality]").forEach(p => p.classList.remove("selected"));
 
@@ -655,7 +661,7 @@
       name,
       status: document.getElementById("cat-status").value,
       intakeDate: document.getElementById("cat-intake").value,
-      medications: document.getElementById("cat-meds").value.trim(),
+      gender: document.getElementById("cat-gender").value,
       notes: document.getElementById("cat-notes").value.trim(),
       personality: selectedPersonalities,
       photo: previewBox.dataset.photo || "",
