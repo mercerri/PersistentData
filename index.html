@@ -56,7 +56,7 @@
       font-size: 14px;
     }
 
-    textarea { resize: none; min-height: 120px; }
+    textarea { resize: none; min-height: 90px;}
 
     .row { display: flex; gap: 16px; margin-bottom: 16px; }
     .row > .field { flex: 1; }
@@ -105,6 +105,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     .thumb img {
@@ -123,6 +124,7 @@
       top: 50%; left: 50%;
       transform-origin: center;
     }
+
     .thumb.placeholder::before { transform: translate(-50%, -50%) rotate(45deg); }
     .thumb.placeholder::after  { transform: translate(-50%, -50%) rotate(-45deg); }
 
@@ -208,6 +210,14 @@
       transform: translate(-50%, -50%) rotate(-45deg);
     }
 
+    /* REMOVE THE BIG X FROM THUMB + PHOTO PREVIEW */
+    .thumb.placeholder::before,
+    .thumb.placeholder::after,
+    .photo-preview.placeholder::before,
+    .photo-preview.placeholder::after {
+      content: none !important;
+    }
+
     .choose-photo-btn {
       text-align: center;
       font-size: 14px;
@@ -253,6 +263,7 @@
     }
   </style>
 </head>
+
 <body>
 <div class="phone">
 
@@ -269,7 +280,6 @@
     <div class="back-link" data-back="home">‹ Back</div>
     <h2>Add a New Foster Cat</h2>
 
-    <!-- PHOTO PREVIEW BOX -->
     <div class="photo-preview placeholder" id="cat-photo-preview"></div>
     <div class="choose-photo-btn" id="choose-photo-btn">Choose Photo</div>
     <input type="file" id="cat-photo-input" accept="image/*" style="display:none;" />
@@ -297,6 +307,7 @@
         <label>Intake Date</label>
         <input id="cat-intake" type="date" />
       </div>
+
       <div class="field">
         <label>Medications</label>
         <input id="cat-meds" type="text" placeholder="Optional" />
@@ -315,8 +326,8 @@
     </div>
 
     <div class="button-row">
-      <button class="btn-primary" id="btn-save-cat">Save</button>
       <button class="btn-secondary" data-back="home">Cancel</button>
+      <button class="btn-primary" id="btn-save-cat">Save</button>
     </div>
   </section>
 
@@ -366,8 +377,8 @@
     </div>
 
     <div class="button-row">
-      <button class="btn-primary" id="btn-save-log">Save</button>
       <button class="btn-secondary" data-back="logs">Cancel</button>
+      <button class="btn-primary" id="btn-save-log">Save</button>
     </div>
   </section>
 </div>
@@ -480,9 +491,11 @@
     document.getElementById("cat-meds").value = "";
     document.getElementById("cat-notes").value = "";
     document.querySelectorAll("[data-personality]").forEach(p => p.classList.remove("selected"));
+
     previewBox.innerHTML = "";
     previewBox.classList.add("placeholder");
     previewBox.dataset.photo = "";
+
     showScreen("screen-add-cat");
   });
 
