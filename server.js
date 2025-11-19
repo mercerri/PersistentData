@@ -14,8 +14,7 @@ app.use(express.json());
 app.get("/health", async (req, res) => {
   try {
     const db = await connectToDatabase();
-    // Quick ping command to confirm DB connection
-    await db.command({ ping: 1 });
+    await db.command({ ping: 1 }); // confirm DB connection
     res.json({ status: "ok", message: "FosterTrack API is running" });
   } catch (err) {
     console.error(err);
@@ -39,7 +38,7 @@ app.get("/logs", async (req, res) => {
 app.post("/logs", async (req, res) => {
   try {
     const db = await connectToDatabase();
-    const newLog = req.body; // expects JSON from frontend
+    const newLog = req.body;
     const result = await db.collection("logs").insertOne(newLog);
     res.status(201).json({ insertedId: result.insertedId });
   } catch (err) {
@@ -48,6 +47,18 @@ app.post("/logs", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 FosterTrack API listening on http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectToDatabase(); // 👈 this is what triggers the MongoDB connection on startup
+
+    app.listen(PORT, () => {
+      console.log(`🚀 FosterTrack API listening on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server because MongoDB is not reachable:");
+    console.error(err);
+    process.exit(1);
+  }
+}
+
+startServer();

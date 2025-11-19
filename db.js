@@ -2,30 +2,25 @@
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
 
+// use MONGODB_URI here to match .env
 const uri = process.env.MONGODB_URI;
 
-// Create one shared client
+// helpful safety check:
+if (!uri) {
+  console.error("❌ MONGODB_URI is not set. Check your .env file.");
+  process.exit(1);
+}
+
 const client = new MongoClient(uri);
-let db;
+let dbInstance;
 
-/**
- * Connect to MongoDB Atlas and return the FosterTrack database.
- * We reuse the same connection so it doesn't reconnect every time.
- */
 async function connectToDatabase() {
-  if (db) {
-    return db; // already connected
-  }
-
-  try {
+  if (!dbInstance) {
     await client.connect();
-    db = client.db("FosterTrack"); // matches your Atlas DB name
     console.log("✅ Connected to MongoDB Atlas");
-    return db;
-  } catch (err) {
-    console.error("❌ Database connection error:", err.message);
-    throw err;
+    dbInstance = client.db("FosterTrack"); // or your actual DB name
   }
+  return dbInstance;
 }
 
 module.exports = { connectToDatabase };
