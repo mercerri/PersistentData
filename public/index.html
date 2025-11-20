@@ -71,7 +71,6 @@
       color: var(--text-main);
     }
 
-    /* Top intro text under headings */
     .screen > p {
       margin: 0 0 16px;
       font-size: 14px;
@@ -156,7 +155,6 @@
       transform: translateY(-1px);
     }
 
-    /* CAT LIST */
     .cat-list {
       margin-top: 16px;
       display: flex;
@@ -186,33 +184,18 @@
     .thumb {
       width: 56px;
       height: 56px;
-      background: #d1d5db;
+      background: #ffffff;   /* ← white instead of grey */
       border-radius: 14px;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
     }
 
-    .thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .cat-icon {
+      width: 32px;
+      height: 32px;
+      fill: var(--accent-strong);
     }
-
-    .thumb.placeholder::before,
-    .thumb.placeholder::after {
-      content: "";
-      position: absolute;
-      width: 80%;
-      height: 1px;
-      background: #666;
-      top: 50%; left: 50%;
-      transform-origin: center;
-    }
-    .thumb.placeholder::before { transform: translate(-50%, -50%) rotate(45deg); }
-    .thumb.placeholder::after  { transform: translate(-50%, -50%) rotate(-45deg); }
 
     .cat-name {
       font-size: 16px;
@@ -294,69 +277,6 @@
       text-decoration: underline;
     }
 
-    /* PHOTO UPLOAD */
-
-    .photo-preview {
-      width: 150px;
-      height: 150px;
-      background: #e5e7eb;
-      border-radius: 20px;
-      margin: 0 auto 8px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px dashed rgba(148, 163, 184, 0.7);
-    }
-
-    .photo-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .photo-preview.placeholder::before,
-    .photo-preview.placeholder::after {
-      content: "";
-      position: absolute;
-      width: 60%;
-      height: 2px;
-      background: #9ca3af;
-      top: 50%;
-      left: 50%;
-    }
-    .photo-preview.placeholder::before {
-      transform: translate(-50%, -50%) rotate(45deg);
-    }
-    .photo-preview.placeholder::after {
-      transform: translate(-50%, -50%) rotate(-45deg);
-    }
-
-    /* REMOVE THE BIG X FROM THUMB + PHOTO PREVIEW */
-    .thumb.placeholder::before,
-    .thumb.placeholder::after,
-    .photo-preview.placeholder::before,
-    .photo-preview.placeholder::after {
-      content: none !important;
-    }
-
-    .choose-photo-btn {
-      text-align: center;
-      font-size: 13px;
-      color: var(--accent-strong);
-      cursor: pointer;
-      margin-bottom: 18px;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .choose-photo-btn:hover {
-      color: var(--accent);
-    }
-
-    /* LOG LIST */
-
     .log-list {
       margin-top: 8px;
       display: flex;
@@ -379,8 +299,6 @@
       color: var(--accent-strong);
       font-size: 13px;
     }
-
-    /* PILLS (personality + mood + medication) */
 
     .pill-row {
       display: flex;
@@ -423,10 +341,7 @@
     <div class="back-link" data-back="home">Back</div>
     <h2>Add a New Foster Cat</h2>
 
-    <!-- PHOTO PREVIEW BOX -->
-    <div class="photo-preview placeholder" id="cat-photo-preview"></div>
-    <div class="choose-photo-btn" id="choose-photo-btn">Choose photo from device</div>
-    <input type="file" id="cat-photo-input" accept="image/*" style="display:none;" />
+    <!-- no photo area here anymore -->
 
     <div class="row">
       <div class="field">
@@ -463,7 +378,6 @@
       </div>
     </div>
 
-    <!-- Personality -->
     <div class="field">
       <label>Personality</label>
       <div class="pill-row" id="personality-pills"></div>
@@ -536,8 +450,9 @@
   const state = {
     cats: [],
     currentCatId: null,
+    currentLogs: [],
     currentMood: null,
-    currentMed: null
+    currentMed: null,
   };
 
   function showScreen(id) {
@@ -545,11 +460,7 @@
     document.getElementById(id).classList.add("active");
   }
 
-  function getCurrentCat() {
-    return state.cats.find(c => c.id === state.currentCatId) || null;
-  }
-
-  /* PERSONALITY */
+  /* ---------- Personality pills ---------- */
   const personalityOptions = [
     "Shy","Playful","Relaxed","Independent",
     "Energetic","Affectionate","Curious","Quiet","Vocal","Calm"
@@ -566,74 +477,137 @@
     personalityPillsContainer.appendChild(pill);
   });
 
-  /* PHOTO UPLOAD */
-  const previewBox = document.getElementById("cat-photo-preview");
-  const chooseBtn = document.getElementById("choose-photo-btn");
-  const photoInput = document.getElementById("cat-photo-input");
+  /* ---------- Data helpers ---------- */
+  async function loadCatsFromServer() {
+    try {
+      const res = await fetch("/cats");
+      if (!res.ok) throw new Error("Failed to load cats");
+      const cats = await res.json();
+      state.cats = cats;
+      renderCats();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load cats from server.");
+    }
+  }
 
-  chooseBtn.addEventListener("click", () => photoInput.click());
+  async function loadLogsForCurrentCat() {
+    if (!state.currentCatId) return;
+    try {
+      const res = await fetch(`/cats/${state.currentCatId}/logs`);
+      if (!res.ok) throw new Error("Failed to load logs");
+      state.currentLogs = await res.json();
+      renderLogs();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load logs.");
+    }
+  }
 
-  photoInput.addEventListener("change", () => {
-    const file = photoInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      previewBox.classList.remove("placeholder");
-      previewBox.innerHTML = `<img src="${reader.result}" />`;
-      previewBox.dataset.photo = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  /* RENDER CATS */
+  /* ---------- Render cats ---------- */
   function renderCats() {
     const container = document.getElementById("cat-list");
     container.innerHTML = "";
 
-    if (state.cats.length === 0) {
+    if (!state.cats.length) {
       const empty = document.createElement("p");
       empty.textContent = "No foster cats yet. Tap + to add one.";
       empty.style.color = "#6b7280";
       empty.style.fontSize = "13px";
-      return container.appendChild(empty);
+      container.appendChild(empty);
+      return;
     }
 
     state.cats.forEach(cat => {
       const card = document.createElement("div");
       card.className = "cat-card";
 
+      const personalities = Array.isArray(cat.personality) && cat.personality.length
+        ? ` • ${cat.personality.join(", ")}`
+        : "";
+
       card.innerHTML = `
-        <div class="thumb ${cat.photo ? "" : "placeholder"}">
-          ${cat.photo ? `<img src="${cat.photo}">` : ""}
+        <div class="thumb">
+          <svg viewBox="0 0 64 64" class="cat-icon" aria-hidden="true">
+            <path d="M16 10l6 8a18 18 0 0 1 20 0l6-8a2 2 0 0 1 3.4 1.6l-1.4 14A18 18 0 0 1 32 52 18 18 0 0 1 14 25.6L12.6 11.6A2 2 0 0 1 16 10z"/>
+            <circle cx="24" cy="30" r="2"/>
+            <circle cx="40" cy="30" r="2"/>
+            <path d="M28 38c1.3 1.3 2.7 2 4 2s2.7-.7 4-2" stroke="#f9fafb" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
         </div>
         <div>
-          <div class="cat-name">${cat.name}</div>
+          <div class="cat-name">${cat.name || "Unnamed"}</div>
           <div class="cat-subinfo">
-            ${cat.status}${cat.gender ? ` • ${cat.gender}` : ""} • ${cat.intakeDate || "No date"}
-            ${cat.personality.length ? ` • ${cat.personality.join(", ")}` : ""}
+            ${cat.status || "In Foster"}${cat.gender ? ` • ${cat.gender}` : ""}${
+              cat.intakeDate ? ` • ${cat.intakeDate}` : ""
+            }${personalities}
           </div>
         </div>
         <button class="delete-btn">Delete</button>
       `;
 
+      // Open logs
       card.addEventListener("click", () => {
-        state.currentCatId = cat.id;
-        renderLogs();
+        state.currentCatId = cat._id;
+        document.getElementById("logs-cat-name").textContent = cat.name || "Cat";
         showScreen("screen-cat-logs");
+        loadLogsForCurrentCat();
       });
 
-      card.querySelector(".delete-btn").addEventListener("click", (e) => {
+      // Delete cat
+      card.querySelector(".delete-btn").addEventListener("click", async (e) => {
         e.stopPropagation();
-        state.cats = state.cats.filter(c => c.id !== cat.id);
-        renderCats();
+        if (!confirm(`Delete ${cat.name || "this cat"} and all its logs?`)) return;
+        try {
+          const res = await fetch(`/cats/${cat._id}`, { method: "DELETE" });
+          if (!res.ok) throw new Error("Delete failed");
+          await loadCatsFromServer();
+          if (state.currentCatId === cat._id) {
+            state.currentCatId = null;
+            state.currentLogs = [];
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Failed to delete cat.");
+        }
       });
 
       container.appendChild(card);
     });
   }
 
-  /* ADD CAT */
+  /* ---------- Render logs ---------- */
+  function renderLogs() {
+    const list = document.getElementById("log-list");
+    list.innerHTML = "";
+
+    if (!state.currentLogs.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "No logs yet. Tap + to add one.";
+      empty.style.color = "#6b7280";
+      empty.style.fontSize = "13px";
+      list.appendChild(empty);
+      return;
+    }
+
+    state.currentLogs.forEach((log, idx) => {
+      const card = document.createElement("div");
+      card.className = "log-card";
+
+      card.innerHTML = `
+        <div class="log-title">Log ${state.currentLogs.length - idx}</div>
+        <div>${log.date || ""}</div>
+        <div>Mood: ${log.mood || ""}</div>
+        <div>Medication: ${log.medication || ""}</div>
+        ${log.medicationDetails ? `<div>${log.medicationDetails}</div>` : ""}
+        ${log.notes ? `<div>${log.notes}</div>` : ""}
+      `;
+
+      list.appendChild(card);
+    });
+  }
+
+  /* ---------- Add cat flow ---------- */
   document.getElementById("btn-add-cat").addEventListener("click", () => {
     document.getElementById("cat-name").value = "";
     document.getElementById("cat-status").value = "In Foster";
@@ -642,73 +616,47 @@
     document.getElementById("cat-notes").value = "";
     document.querySelectorAll("[data-personality]").forEach(p => p.classList.remove("selected"));
 
-    previewBox.innerHTML = "";
-    previewBox.classList.add("placeholder");
-    previewBox.dataset.photo = "";
-
     showScreen("screen-add-cat");
   });
 
-  document.getElementById("btn-save-cat").addEventListener("click", () => {
+  document.getElementById("btn-save-cat").addEventListener("click", async () => {
     const name = document.getElementById("cat-name").value.trim();
-    if (!name) return alert("Please enter a name.");
+    if (!name) {
+      alert("Please enter a name.");
+      return;
+    }
 
     const selectedPersonalities =
       [...document.querySelectorAll("[data-personality].selected")].map(p => p.dataset.personality);
 
-    const newCat = {
-      id: Date.now().toString(),
+    const payload = {
       name,
       status: document.getElementById("cat-status").value,
       intakeDate: document.getElementById("cat-intake").value,
       gender: document.getElementById("cat-gender").value,
       notes: document.getElementById("cat-notes").value.trim(),
-      personality: selectedPersonalities,
-      photo: previewBox.dataset.photo || "",
-      logs: []
+      personality: selectedPersonalities
+      // no photo field anymore
     };
 
-    state.cats.push(newCat);
-    renderCats();
-    showScreen("screen-home");
+    try {
+      const res = await fetch("/cats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to save cat");
+      await loadCatsFromServer();
+      showScreen("screen-home");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save cat");
+    }
   });
 
-  /* LOGS */
-  function renderLogs() {
-    const cat = getCurrentCat();
-    const list = document.getElementById("log-list");
-    list.innerHTML = "";
-
-    document.getElementById("logs-cat-name").textContent = cat.name;
-
-    if (cat.logs.length === 0) {
-      const empty = document.createElement("p");
-      empty.textContent = "No logs yet. Tap + to add one.";
-      empty.style.color = "#6b7280";
-      empty.style.fontSize = "13px";
-      return list.appendChild(empty);
-    }
-
-    cat.logs.slice().reverse().forEach((log, index) => {
-      const card = document.createElement("div");
-      card.className = "log-card";
-
-      card.innerHTML = `
-        <div class="log-title">Log ${cat.logs.length - index}</div>
-        <div>${log.date}</div>
-        <div>Mood: ${log.mood}</div>
-        <div>Medication: ${log.medication}</div>
-        ${log.notes ? `<div>${log.notes}</div>` : ""}
-      `;
-
-      list.appendChild(card);
-    });
-  }
-
+  /* ---------- Logs flow ---------- */
   document.getElementById("btn-add-log").addEventListener("click", () => {
-    const cat = getCurrentCat();
-    if (!cat) return;
-
+    if (!state.currentCatId) return;
     state.currentMood = null;
     state.currentMed = null;
 
@@ -738,23 +686,33 @@
     });
   });
 
-  document.getElementById("btn-save-log").addEventListener("click", () => {
-    const cat = getCurrentCat();
-    if (!cat) return;
+  document.getElementById("btn-save-log").addEventListener("click", async () => {
+    if (!state.currentCatId) return;
 
-    const newLog = {
-      id: Date.now().toString(),
+    const payload = {
       date: document.getElementById("log-date").value,
       mood: state.currentMood,
       medication: state.currentMed,
-      notes: document.getElementById("log-notes").value.trim()
+      medicationDetails: document.getElementById("log-meds").value.trim(),
+      notes: document.getElementById("log-notes").value.trim(),
     };
 
-    cat.logs.push(newLog);
-    renderLogs();
-    showScreen("screen-cat-logs");
+    try {
+      const res = await fetch(`/cats/${state.currentCatId}/logs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to save log");
+      await loadLogsForCurrentCat();
+      showScreen("screen-cat-logs");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save log");
+    }
   });
 
+  /* ---------- Back links ---------- */
   document.querySelectorAll("[data-back]").forEach(el => {
     el.addEventListener("click", () => {
       const target = el.dataset.back;
@@ -763,7 +721,8 @@
     });
   });
 
-  renderCats();
+  // Initial load
+  loadCatsFromServer();
 </script>
 
 </body>
