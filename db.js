@@ -2,25 +2,33 @@
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
 
-// use MONGODB_URI here to match .env
-const uri = process.env.MONGODB_URI;
-
-// helpful safety check:
-if (!uri) {
-  console.error("❌ MONGODB_URI is not set. Check your .env file.");
-  process.exit(1);
-}
-
-const client = new MongoClient(uri);
-let dbInstance;
+let client;
+let db;
 
 async function connectToDatabase() {
-  if (!dbInstance) {
-    await client.connect();
-    console.log("✅ Connected to MongoDB Atlas");
-    dbInstance = client.db("FosterTrack"); // or your actual DB name
+  // Reuse connection if already open
+  if (db) return db;
+
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    // Extra logging so Render logs are helpful
+    console.error("❌ MONGODB_URI is NOT defined.");
+    console.error("Available env keys:", Object.keys(process.env));
+    throw new Error("MONGODB_URI is not set in environment variables");
   }
-  return dbInstance;
+
+  console.log("🔌 Using Mongo URI:", uri.split("@")[1] || "(hidden)");
+
+  client = new MongoClient(uri);
+  await client.connect();
+
+  // Use DB_NAME if set, otherwise default to FosterTrack
+  const dbName = process.env.DB_NAME || "FosterTrack";
+  db = client.db(dbName);
+
+  console.log(`✅ Connected to MongoDB Atlas, DB: ${dbName}`);
+  return db;
 }
 
 module.exports = { connectToDatabase };
