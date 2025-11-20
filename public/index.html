@@ -55,7 +55,7 @@
     .screen {
       width: 100%;
       height: 100%;
-      padding: 28px 22px 80px;
+      padding: 28px 22px 96px;
       display: none;
       position: absolute;
       top: 0;
@@ -226,22 +226,22 @@
       transform: translateY(-1px);
     }
 
-    .fab {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
-      background: var(--accent);
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 10px 25px rgba(37, 82, 79, 0.5);
-    }
+  .fab {
+    position: absolute;
+    bottom: 32px;        /* was 24px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: var(--accent);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(37, 82, 79, 0.5);
+}
 
     .fab::before,
     .fab::after {
