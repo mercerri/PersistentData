@@ -36,7 +36,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 30px 0;          /* space above and below phone */
+      padding: 30px 0;
       min-height: 100vh;
       box-sizing: border-box;
     }
@@ -52,9 +52,6 @@
       box-shadow:
         0 18px 45px rgba(15, 23, 42, 0.28),
         0 0 0 1px rgba(148, 163, 184, 0.35);
-
-      /* Scale so the phone always fits inside the viewport
-         with some margin around it */
       transform: scale(
         calc(
           min(
@@ -198,7 +195,7 @@
     .thumb {
       width: 56px;
       height: 56px;
-      background: #ffffff;   /* white background behind icon */
+      background: #ffffff;
       border-radius: 14px;
       display: flex;
       align-items: center;
@@ -307,11 +304,33 @@
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
     }
 
+    .log-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
     .log-title {
       font-weight: 700;
-      margin-bottom: 4px;
       color: var(--accent-strong);
       font-size: 13px;
+    }
+
+    .edit-log-btn {
+      border: none;
+      background: #e1f2f0;
+      color: var(--accent-strong);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.08s ease;
+    }
+
+    .edit-log-btn:hover {
+      background: #c7e4df;
+      transform: translateY(-1px);
     }
 
     .pill-row {
@@ -354,8 +373,6 @@
   <section class="screen" id="screen-add-cat">
     <div class="back-link" data-back="home">Back</div>
     <h2>Add a New Foster Cat</h2>
-
-    <!-- no photo area here anymore -->
 
     <div class="row">
       <div class="field">
@@ -467,11 +484,27 @@
     currentLogs: [],
     currentMood: null,
     currentMed: null,
+    isEditingLog: false,
+    currentLogId: null,
   };
 
   function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
+  }
+
+  /* ---------- Helper to get a string id from Mongo ---------- */
+  function getLogId(log) {
+    if (!log || !log._id) return null;
+
+    // If it's already a string, use it
+    if (typeof log._id === "string") return log._id;
+
+    // Typical JSON from Mongo: { _id: { $oid: "...." } }
+    if (typeof log._id === "object" && log._id.$oid) return log._id.$oid;
+
+    // Fallback – stringify whatever it is
+    return String(log._id);
   }
 
   /* ---------- Personality pills ---------- */
@@ -562,7 +595,7 @@
 
       // Open logs
       card.addEventListener("click", () => {
-        state.currentCatId = cat._id;
+        state.currentCatId = cat._id?.$oid || cat._id || state.currentCatId;
         document.getElementById("logs-cat-name").textContent = cat.name || "Cat";
         showScreen("screen-cat-logs");
         loadLogsForCurrentCat();
@@ -573,10 +606,11 @@
         e.stopPropagation();
         if (!confirm(`Delete ${cat.name || "this cat"} and all its logs?`)) return;
         try {
-          const res = await fetch(`/cats/${cat._id}`, { method: "DELETE" });
+          const catId = cat._id?.$oid || cat._id;
+          const res = await fetch(`/cats/${catId}`, { method: "DELETE" });
           if (!res.ok) throw new Error("Delete failed");
           await loadCatsFromServer();
-          if (state.currentCatId === cat._id) {
+          if (state.currentCatId === catId) {
             state.currentCatId = null;
             state.currentLogs = [];
           }
@@ -590,7 +624,7 @@
     });
   }
 
-  /* ---------- Render logs ---------- */
+  /* ---------- Render logs (with Edit) ---------- */
   function renderLogs() {
     const list = document.getElementById("log-list");
     list.innerHTML = "";
@@ -609,7 +643,12 @@
       card.className = "log-card";
 
       card.innerHTML = `
-        <div class="log-title">Log ${state.currentLogs.length - idx}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div class="log-title">Log ${state.currentLogs.length - idx}</div>
+          <button class="edit-log-btn" style="border:none;background:none;font-size:12px;color:#2563eb;cursor:pointer;">
+            Edit
+          </button>
+        </div>
         <div>${log.date || ""}</div>
         <div>Mood: ${log.mood || ""}</div>
         <div>Medication: ${log.medication || ""}</div>
@@ -617,8 +656,40 @@
         ${log.notes ? `<div>${log.notes}</div>` : ""}
       `;
 
+      const editBtn = card.querySelector(".edit-log-btn");
+      editBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const logId = getLogId(log);
+        startEditLog(log, logId);
+      });
+
       list.appendChild(card);
     });
+  }
+
+  /* ---------- Start editing a log ---------- */
+  function startEditLog(log, logId) {
+    state.isEditingLog = true;
+    state.currentLogId = logId;
+
+    // Prefill fields
+    document.getElementById("log-date").value = log.date || "";
+    document.getElementById("log-meds").value = log.medicationDetails || "";
+    document.getElementById("log-notes").value = log.notes || "";
+
+    // Mood pills
+    state.currentMood = log.mood || null;
+    document.querySelectorAll('.pill[data-mood]').forEach(p => {
+      p.classList.toggle("selected", p.dataset.mood === state.currentMood);
+    });
+
+    // Medication pills
+    state.currentMed = log.medication || null;
+    document.querySelectorAll('.pill[data-med]').forEach(p => {
+      p.classList.toggle("selected", p.dataset.med === state.currentMed);
+    });
+
+    showScreen("screen-add-log");
   }
 
   /* ---------- Add cat flow ---------- */
@@ -650,7 +721,6 @@
       gender: document.getElementById("cat-gender").value,
       notes: document.getElementById("cat-notes").value.trim(),
       personality: selectedPersonalities
-      // no photo field anymore
     };
 
     try {
@@ -671,6 +741,10 @@
   /* ---------- Logs flow ---------- */
   document.getElementById("btn-add-log").addEventListener("click", () => {
     if (!state.currentCatId) return;
+
+    // new log mode
+    state.isEditingLog = false;
+    state.currentLogId = null;
     state.currentMood = null;
     state.currentMed = null;
 
@@ -711,13 +785,28 @@
       notes: document.getElementById("log-notes").value.trim(),
     };
 
+    const isEditing = state.isEditingLog && state.currentLogId;
+    const url = isEditing
+      ? `/logs/${state.currentLogId}`
+      : `/cats/${state.currentCatId}/logs`;
+    const method = isEditing ? "PUT" : "POST";
+
     try {
-      const res = await fetch(`/cats/${state.currentCatId}/logs`, {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to save log");
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Save log failed:", res.status, text);
+        throw new Error("Failed to save log");
+      }
+
+      state.isEditingLog = false;
+      state.currentLogId = null;
+
       await loadLogsForCurrentCat();
       showScreen("screen-cat-logs");
     } catch (err) {
@@ -731,13 +820,18 @@
     el.addEventListener("click", () => {
       const target = el.dataset.back;
       if (target === "home") showScreen("screen-home");
-      if (target === "logs") showScreen("screen-cat-logs");
+      if (target === "logs") {
+        state.isEditingLog = false;
+        state.currentLogId = null;
+        showScreen("screen-cat-logs");
+      }
     });
   });
 
   // Initial load
   loadCatsFromServer();
 </script>
+
 
 </body>
 </html>

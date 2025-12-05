@@ -161,6 +161,49 @@ app.post("/cats/:catId/logs", async (req, res) => {
   }
 });
 
+// Update an existing log
+app.put("/logs/:id", async (req, res) => {
+  try {
+    const db = await connectToDatabase();
+    const logsCol = db.collection("logs"); // <-- same collection name you used before
+
+    const { id } = req.params;
+
+    // Make sure the id is a valid ObjectId
+    let objectId;
+    try {
+      objectId = new ObjectId(id);
+    } catch (err) {
+      return res.status(400).json({ error: "Invalid log id" });
+    }
+
+    const { date, mood, medication, medicationDetails, notes } = req.body;
+
+    const result = await logsCol.updateOne(
+      { _id: objectId },
+      {
+        $set: {
+          date,
+          mood,
+          medication,
+          medicationDetails,
+          notes,
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Log not found" });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error updating log:", err);
+    res.status(500).json({ error: "Failed to update log" });
+  }
+});
+
+
 /* ---------- Start server ---------- */
 async function startServer() {
   try {
